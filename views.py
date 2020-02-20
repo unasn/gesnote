@@ -3347,20 +3347,22 @@ def calc_moy_tp_ue(examid):
     tp=Compotype.objects.get(id=3)
     sumcoef=Composition.objects.filter(Q(examen=examen) & Q(comptype=tp)).aggregate(sumcoef=Sum('coefficient'))
     compos=Composition.objects.filter(Q(examen=examen) & Q(comptype=tp))
-    sumnote=Notes_ecue.objects.values('etudiant').filter(composition__in=compos).annotate(sumnote=Sum('notepond')) 
+    
     if examen.afficher==True:
-        etlist=Moyenne_ecue_cm.objects.filter(Q(examen=examen) & Q(reclamation=True)).distinct('etudiant').values_list('etudiant')
-        sumnote=Moyenne_ecue_cm.objects.values('etudiant').filter(Q(examen=examen) & Q(reclamation=True)).annotate(sumnote=Sum('moypond'))
-        mx=Moyenne_ue_tp.objects.filter(Q(examen=examen) & Q(etudiant__in=etlist))
+        sumnote=Notes_ecue.objects.values('etudiant').filter(Q(composition__in=compos) & Q(reclamation=True)).annotate(sumnote=Sum('notepond')) 
+        mx=Moyenne_ue_tp.objects.filter(Q(examen=examen) & Q(reclamation=True))
     else:
-        sumnote=Moyenne_ecue_cm.objects.values('etudiant').filter(examen=examen).annotate(sumnote=Sum('moypond'))
+        sumnote=Notes_ecue.objects.values('etudiant').filter(composition__in=compos).annotate(sumnote=Sum('notepond')) 
         mx=Moyenne_ue_tp.objects.filter(examen=examen)
     if mx:
         mx.delete()
     for s in sumnote:
             etudiantid=s['etudiant']
             etx=Etudiant.objects.get(etudiantid=etudiantid)
-            m=Moyenne_ue_tp.objects.create(etudiant=etx,examen=examen,sumtp=s['sumnote'],coefsum=sumcoef['sumcoef'])
+            if examen.afficher==True:
+                m=Moyenne_ue_tp.objects.create(etudiant=etx,examen=examen,sumtp=s['sumnote'],coefsum=coef,reclamation=True)
+            else:
+                m=Moyenne_ue_tp.objects.create(etudiant=etx,examen=examen,sumtp=s['sumnote'],coefsum=sumcoef['sumcoef'])
             m.save()
             
 
