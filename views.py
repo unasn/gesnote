@@ -3360,7 +3360,7 @@ def calc_moy_tp_ue(examid):
             etudiantid=s['etudiant']
             etx=Etudiant.objects.get(etudiantid=etudiantid)
             if examen.afficher==True:
-                m=Moyenne_ue_tp.objects.create(etudiant=etx,examen=examen,sumtp=s['sumnote'],coefsum=coef,reclamation=True)
+                m=Moyenne_ue_tp.objects.create(etudiant=etx,examen=examen,sumtp=s['sumnote'],coefsum=sumcoef['sumcoef'],reclamation=True)
             else:
                 m=Moyenne_ue_tp.objects.create(etudiant=etx,examen=examen,sumtp=s['sumnote'],coefsum=sumcoef['sumcoef'])
             m.save()
