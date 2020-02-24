@@ -3444,15 +3444,26 @@ def calculate2(request,examid):
             m.save()
         coef=examen.coefcm+examen.coeftp
         sumnote=Moyenne_tmp_cmtp.objects.values('etudiant').filter(examen=examen).annotate(sumnote=Sum('moypond'))
-        nx=Moyenne_Ue.objects.filter(examen=examen)
+        if examen.afficher==True:
+            nx=Moyenne_Ue.objects.filter(Q(examen=examen) & Q(reclamation=True))
+        else:  
+            nx=Moyenne_Ue.objects.filter(examen=examen)
         if nx:
             nx.delete()
         for s in sumnote:
-            m=Moyenne_Ue.objects.create(
+            if examen.afficher==False:
+                
+                m=Moyenne_Ue.objects.create(
                 etudiant=Etudiant.objects.get(etudiantid=s['etudiant']),
                 examen=examen,
                 somme=s["sumnote"],coefficient=coef
-            )
+                )
+            else:
+                m=Moyenne_Ue.objects.create(
+                etudiant=Etudiant.objects.get(etudiantid=s['etudiant']),
+                examen=examen,
+                somme=s["sumnote"],coefficient=coef,reclamation=True
+                )
             m.save()
             
         if examen.afficher==True:
